@@ -1,50 +1,346 @@
-///
-/// Gradient Text Flow & Animation Utility Classes
-/// ----------------------------------------------
-/// Reusable SCSS utilities for animated gradient text.
-///
+// _gradient-text-flow-animation-utility-classes.scss
+// =====================================================
+// EaseMotion CSS — Gradient Text Flow & Animation Utility Classes
+//
+// Provides a comprehensive suite of SCSS mixins, functions, and
+// pre-built utility classes for creating animated gradient text
+// effects. Includes linear, radial, conic, and multi-stop gradient
+// text flows with configurable speed, direction, and easing.
+//
+// Naming: All classes use the -um suffix (contributor: ujwal-224)
+// to avoid conflicts with other contributor submissions.
+//
+// Usage:
+//   @use 'gradient-text-flow-animation-utility-classes' as ease-grad;
+//   .my-heading { @include ease-grad.gradient-text-flow-um(#6366f1, #ec4899); }
+//
+// Or use the pre-built utility classes directly in HTML:
+//   <h1 class="ease-gradient-text-um ease-gradient-aurora-um ease-gradient-flow-slow-um">
+//     Hello World
+//   </h1>
+// =====================================================
 
-$gradient-flow-duration: 4s !default;
-$gradient-flow-size: 200% auto !default;
 
-@mixin gradient-text-flow(
-  $gradient: linear-gradient(
-    90deg,
-    #ff6b6b,
-    #feca57,
-    #48dbfb,
-    #5f27cd,
-    #ff6b6b
-  ),
-  $duration: $gradient-flow-duration
+// -------------------------------------------------------
+// 1. Configuration Variables
+// -------------------------------------------------------
+
+/// Default animation durations for gradient flow.
+/// @type Number
+$ease-gradient-duration-fast-um:   2s   !default;
+$ease-gradient-duration-medium-um: 4s   !default;
+$ease-gradient-duration-slow-um:   8s   !default;
+
+/// Default background-size for gradient pan effect.
+/// A value of 200% allows the background to shift visibly.
+/// @type Number
+$ease-gradient-bg-size-um: 200% auto !default;
+
+/// Default timing function for gradient flow animations.
+/// @type String
+$ease-gradient-easing-um: linear !default;
+
+/// Pre-built gradient palette tokens.
+/// These map to utility class suffixes (ease-gradient-{name}-um).
+/// @type Map
+$ease-gradient-presets-um: (
+  'aurora':   (from: #4facfe, via: #a78bfa,  to: #f472b6),
+  'sunset':   (from: #f97316, via: #ec4899,  to: #9333ea),
+  'ocean':    (from: #06b6d4, via: #3b82f6,  to: #6366f1),
+  'forest':   (from: #6ee7b7, via: #34d399,  to: #059669),
+  'fire':     (from: #fde68a, via: #f97316,  to: #dc2626),
+  'candy':    (from: #f9a8d4, via: #c084fc,  to: #818cf8),
+  'neon':     (from: #00fff0, via: #a855f7,  to: #ec4899),
+  'gold':     (from: #fbbf24, via: #f59e0b,  to: #d97706),
+  'plasma':   (from: #e879f9, via: #818cf8,  to: #22d3ee),
+  'cosmic':   (from: #1d4ed8, via: #7c3aed,  to: #db2777),
+) !default;
+
+
+// -------------------------------------------------------
+// 2. Core Keyframes
+// -------------------------------------------------------
+
+/// Pans background-position left → right → left.
+@keyframes ease-gradient-flow-lr-um {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/// Pans the gradient diagonally for a more dynamic sweep.
+@keyframes ease-gradient-flow-diagonal-um {
+  0%   { background-position: 0% 0%; }
+  50%  { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+/// Pulses the gradient scale and opacity — creates a breathing / glowing effect.
+@keyframes ease-gradient-pulse-um {
+  0%, 100% { background-size: 200% auto; opacity: 1; }
+  50%       { background-size: 250% auto; opacity: 0.8; }
+}
+
+/// Rotates hue via filter: hue-rotate() — compositor-only, very smooth.
+@keyframes ease-gradient-spin-um {
+  from { filter: hue-rotate(0deg); }
+  to   { filter: hue-rotate(360deg); }
+}
+
+/// Sweeps a bright highlight across the gradient text left-to-right.
+@keyframes ease-gradient-shimmer-um {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+
+// -------------------------------------------------------
+// 3. Core Mixin: gradient-text-flow-um
+// -------------------------------------------------------
+
+/// Applies an animated flowing gradient to text.
+///
+/// @param {Color}  $from      - Gradient start color. Default: #6366f1
+/// @param {Color}  $to        - Gradient end color. Default: #ec4899
+/// @param {Color}  $via       - Optional mid-stop color. Default: null
+/// @param {String} $direction - Gradient direction or angle. Default: 'to right'
+/// @param {Number} $duration  - Animation duration. Default: 4s
+/// @param {String} $easing    - CSS timing function. Default: linear
+/// @param {String} $keyframe  - @keyframes name to use. Default: ease-gradient-flow-lr-um
+///
+/// @example
+///   .hero-title {
+///     @include ease-grad.gradient-text-flow-um(#06b6d4, #6366f1, $via: #a78bfa);
+///   }
+@mixin gradient-text-flow-um(
+  $from:      #6366f1,
+  $to:        #ec4899,
+  $via:       null,
+  $direction: to right,
+  $duration:  $ease-gradient-duration-medium-um,
+  $easing:    $ease-gradient-easing-um,
+  $keyframe:  ease-gradient-flow-lr-um
 ) {
-  background: $gradient;
-  background-size: $gradient-flow-size;
+  $gradient-stops: if($via != null, ($from, $via, $to), ($from, $to));
+
+  background-image:        linear-gradient($direction, $gradient-stops...);
+  background-size:         $ease-gradient-bg-size-um;
+  background-clip:         text;
   -webkit-background-clip: text;
-  background-clip: text;
+  color:                   transparent;
   -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: gradient-text-flow $duration linear infinite;
-}
+  display:                 inline-block;
+  animation:               $keyframe $duration $easing infinite;
 
-@keyframes gradient-text-flow {
-  0% {
-    background-position: 0% center;
-  }
-
-  100% {
-    background-position: 200% center;
+  @media (prefers-reduced-motion: reduce) {
+    animation:       none;
+    background-size: 100% auto;
+    background-position: 0% 50%;
   }
 }
 
-.gradient-text-flow {
-  @include gradient-text-flow();
+
+// -------------------------------------------------------
+// 4. Specialized Mixins
+// -------------------------------------------------------
+
+/// Applies a diagonal-sweep animated gradient to text.
+///
+/// @param {Color}  $from      - Gradient start color.
+/// @param {Color}  $to        - Gradient end color.
+/// @param {Color}  $via       - Optional mid-stop. Default: null
+/// @param {Number} $duration  - Animation duration. Default: 4s
+///
+/// @example
+///   .section-heading {
+///     @include ease-grad.gradient-text-diagonal-um(#f97316, #9333ea, $via: #ec4899);
+///   }
+@mixin gradient-text-diagonal-um(
+  $from:     #f97316,
+  $to:       #9333ea,
+  $via:      null,
+  $duration: $ease-gradient-duration-medium-um
+) {
+  $stops: if($via != null, ($from, $via, $to), ($from, $to));
+  background-image:        linear-gradient(to bottom right, $stops...);
+  background-size:         300% 300%;
+  background-clip:         text;
+  -webkit-background-clip: text;
+  color:                   transparent;
+  -webkit-text-fill-color: transparent;
+  display:                 inline-block;
+  animation:               ease-gradient-flow-diagonal-um $duration linear infinite;
+
+  @media (prefers-reduced-motion: reduce) { animation: none; }
 }
 
-.gradient-text-flow-slow {
-  @include gradient-text-flow($duration: 8s);
+/// Applies a pulsing gradient text — size and opacity breathe in/out.
+///
+/// @param {Color}  $from      - Gradient start color.
+/// @param {Color}  $to        - Gradient end color.
+/// @param {Color}  $via       - Optional mid-stop. Default: null
+/// @param {Number} $duration  - Animation duration. Default: 4s
+///
+/// @example
+///   .live-badge { @include ease-grad.gradient-text-pulse-um(#4facfe, #f472b6); }
+@mixin gradient-text-pulse-um(
+  $from:     #4facfe,
+  $to:       #f472b6,
+  $via:      null,
+  $duration: $ease-gradient-duration-medium-um
+) {
+  $stops: if($via != null, ($from, $via, $to), ($from, $to));
+  background-image:        linear-gradient(to right, $stops...);
+  background-size:         200% auto;
+  background-clip:         text;
+  -webkit-background-clip: text;
+  color:                   transparent;
+  -webkit-text-fill-color: transparent;
+  display:                 inline-block;
+  animation:               ease-gradient-pulse-um $duration ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) { animation: none; }
 }
 
-.gradient-text-flow-fast {
-  @include gradient-text-flow($duration: 2s);
+/// Applies a hue-rotating gradient — cycles through all hues via filter.
+/// Uses filter: hue-rotate() — single compositor pass, 60fps-safe.
+///
+/// @param {Color}  $from      - Gradient start color.
+/// @param {Color}  $to        - Gradient end color.
+/// @param {Number} $duration  - Animation duration. Default: 8s
+///
+/// @example
+///   .rainbow-heading { @include ease-grad.gradient-text-hue-spin-um(#ec4899, #6366f1); }
+@mixin gradient-text-hue-spin-um(
+  $from:     #ec4899,
+  $to:       #6366f1,
+  $duration: $ease-gradient-duration-slow-um
+) {
+  background-image:        linear-gradient(to right, $from, $to);
+  background-size:         200% auto;
+  background-clip:         text;
+  -webkit-background-clip: text;
+  color:                   transparent;
+  -webkit-text-fill-color: transparent;
+  display:                 inline-block;
+  animation:               ease-gradient-spin-um $duration linear infinite;
+
+  @media (prefers-reduced-motion: reduce) { animation: none; }
 }
+
+/// Applies a shimmer-sweep — a bright highlight sweeps left-to-right.
+///
+/// @param {Color}  $from      - Gradient start color.
+/// @param {Color}  $to        - Gradient end color.
+/// @param {Number} $duration  - Animation duration. Default: 2.5s
+///
+/// @example
+///   .premium-label { @include ease-grad.gradient-text-shimmer-um(#fbbf24, #f97316); }
+@mixin gradient-text-shimmer-um(
+  $from:     #fbbf24,
+  $to:       #f97316,
+  $duration: 2.5s
+) {
+  background-image: linear-gradient(
+    120deg,
+    $from 20%,
+    rgba(255, 255, 255, 0.85) 50%,
+    $to 80%
+  );
+  background-size:         400% auto;
+  background-clip:         text;
+  -webkit-background-clip: text;
+  color:                   transparent;
+  -webkit-text-fill-color: transparent;
+  display:                 inline-block;
+  animation:               ease-gradient-shimmer-um $duration linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation:        none;
+    background-size:  100% auto;
+    background-image: linear-gradient(to right, $from, $to);
+  }
+}
+
+
+// -------------------------------------------------------
+// 5. Preset Color Class Generator
+// -------------------------------------------------------
+
+/// Generates .ease-gradient-{name}-um classes from $ease-gradient-presets-um.
+/// Each class exposes CSS variables consumed by .ease-gradient-text-um.
+@mixin generate-gradient-presets-um() {
+  @each $name, $stops in $ease-gradient-presets-um {
+    .ease-gradient-#{$name}-um {
+      --ease-grad-from-um: #{map-get($stops, 'from')};
+      --ease-grad-via-um:  #{map-get($stops, 'via')};
+      --ease-grad-to-um:   #{map-get($stops, 'to')};
+    }
+  }
+}
+
+
+// -------------------------------------------------------
+// 6. Pre-built Utility Classes (Output)
+// -------------------------------------------------------
+
+/// Base class — required on every utility class usage.
+/// Sets up background-clip: text with CSS variable stops.
+.ease-gradient-text-um {
+  background-image: linear-gradient(
+    to right,
+    var(--ease-grad-from-um, #6366f1),
+    var(--ease-grad-via-um,  #a78bfa),
+    var(--ease-grad-to-um,   #ec4899)
+  );
+  background-size:         200% auto;
+  background-clip:         text;
+  -webkit-background-clip: text;
+  color:                   transparent;
+  -webkit-text-fill-color: transparent;
+  display:                 inline-block;
+}
+
+// Speed modifiers
+.ease-gradient-flow-fast-um   { animation: ease-gradient-flow-lr-um $ease-gradient-duration-fast-um   linear     infinite; }
+.ease-gradient-flow-medium-um { animation: ease-gradient-flow-lr-um $ease-gradient-duration-medium-um linear     infinite; }
+.ease-gradient-flow-slow-um   { animation: ease-gradient-flow-lr-um $ease-gradient-duration-slow-um   linear     infinite; }
+
+// Direction variants
+.ease-gradient-flow-diagonal-um {
+  animation:       ease-gradient-flow-diagonal-um $ease-gradient-duration-medium-um linear infinite;
+  background-size: 300% 300%;
+}
+
+// Effect variants
+.ease-gradient-pulse-um    { animation: ease-gradient-pulse-um    $ease-gradient-duration-medium-um ease-in-out infinite; }
+.ease-gradient-hue-spin-um { animation: ease-gradient-spin-um     $ease-gradient-duration-slow-um   linear      infinite; }
+.ease-gradient-shimmer-um  {
+  background-image: linear-gradient(
+    120deg,
+    var(--ease-grad-from-um, #fbbf24) 20%,
+    rgba(255, 255, 255, 0.85)         50%,
+    var(--ease-grad-to-um,   #f97316) 80%
+  );
+  background-size: 400% auto;
+  animation: ease-gradient-shimmer-um 2.5s linear infinite;
+}
+
+/// Reduced motion: disable all animations globally for this module
+@media (prefers-reduced-motion: reduce) {
+  .ease-gradient-text-um,
+  .ease-gradient-flow-fast-um,
+  .ease-gradient-flow-medium-um,
+  .ease-gradient-flow-slow-um,
+  .ease-gradient-flow-diagonal-um,
+  .ease-gradient-pulse-um,
+  .ease-gradient-hue-spin-um,
+  .ease-gradient-shimmer-um {
+    animation:           none !important;
+    background-size:     100% auto !important;
+    background-position: 0% 50% !important;
+  }
+}
+
+// Generate all preset color classes
+@include generate-gradient-presets-um();

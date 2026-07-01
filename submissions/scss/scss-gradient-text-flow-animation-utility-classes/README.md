@@ -2,242 +2,183 @@
 
 **EaseMotion CSS SCSS Utility** · `submissions/scss/scss-gradient-text-flow-animation-utility-classes/`
 
-A comprehensive SCSS partial providing mixins, functions, and pre-built utility classes for creating smooth, animated gradient text effects. Supports linear flow, diagonal sweep, pulse, hue-spin, and shimmer effects across 10 curated preset palettes.
+---
+
+## What does this do?
+
+This SCSS partial provides a comprehensive set of mixins, keyframe definitions, and pre-built utility classes for applying smooth, animated gradient text effects to any text element. It supports five distinct animation styles — left-to-right flow, diagonal sweep, breathe/pulse, hue-wheel rotation, and shimmer highlight sweep — across 10 curated gradient presets.
+
+All classes use the `-um` suffix per CONTRIBUTING guidelines to avoid naming conflicts with other contributors' submissions.
 
 ---
 
-## File Structure
+## How is it used?
 
-```
-scss-gradient-text-flow-animation-utility-classes/
-├── _gradient-text-flow-animation-utility-classes.scss   ← SCSS partial (import this)
-└── README.md                                            ← This documentation
-```
+### Option A — SCSS Mixin (recommended)
 
----
-
-## Installation / Import
-
-In your project's main SCSS entry point:
+Import the partial and call a mixin in your SCSS:
 
 ```scss
 @use 'path/to/_gradient-text-flow-animation-utility-classes' as ease-grad;
-```
 
-Or as a partial `@forward` in a manifest:
-
-```scss
-@forward 'path/to/_gradient-text-flow-animation-utility-classes';
-```
-
----
-
-## Configuration Variables
-
-Override these `!default` variables before importing to customize global defaults:
-
-| Variable | Default | Description |
-|---|---|---|
-| `$ease-gradient-duration-fast` | `2s` | Duration for `-flow-fast` classes |
-| `$ease-gradient-duration-medium` | `4s` | Duration for `-flow-medium` classes |
-| `$ease-gradient-duration-slow` | `8s` | Duration for `-flow-slow` classes |
-| `$ease-gradient-bg-size` | `200% auto` | Default background-size for the pan effect |
-| `$ease-gradient-easing` | `linear` | Timing function for all flow animations |
-| `$ease-gradient-presets` | Map of 10 presets | Preset palette map (extend or override) |
-
----
-
-## Mixins
-
-### `gradient-text-flow()` — Main Mixin
-
-Applies an animated left-to-right flowing gradient to text.
-
-```scss
-@mixin gradient-text-flow(
-  $from:      #6366f1,   // Gradient start color
-  $to:        #ec4899,   // Gradient end color
-  $via:       null,      // Optional mid-stop color (3-stop gradient)
-  $direction: to right,  // Gradient direction or angle
-  $duration:  4s,        // Animation duration
-  $easing:    linear,    // CSS timing function
-  $keyframe:  ease-gradient-flow-lr  // @keyframes name to use
-)
-```
-
-**Example:**
-
-```scss
+// Two-stop gradient flow
 .hero-title {
-  @include ease-grad.gradient-text-flow(#06b6d4, #6366f1, $via: #a78bfa, $duration: 3s);
+  @include ease-grad.gradient-text-flow-um(#06b6d4, #6366f1);
 }
-```
 
-**Compiled CSS output (abbreviated):**
-
-```css
-.hero-title {
-  background-image: linear-gradient(to right, #06b6d4, #a78bfa, #6366f1);
-  background-size: 200% auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  animation: ease-gradient-flow-lr 3s linear infinite;
+// Three-stop gradient flow with custom duration
+.section-label {
+  @include ease-grad.gradient-text-flow-um(
+    $from:     #f97316,
+    $to:       #9333ea,
+    $via:      #ec4899,
+    $duration: 3s
+  );
 }
-@media (prefers-reduced-motion: reduce) {
-  .hero-title { animation: none; background-size: 100% auto; }
+
+// Diagonal sweep
+.card-heading {
+  @include ease-grad.gradient-text-diagonal-um(#4facfe, #f472b6);
 }
-```
 
----
-
-### `gradient-text-diagonal()` — Diagonal Sweep
-
-Flows the gradient diagonally (top-left → bottom-right) for a more dynamic effect.
-
-```scss
-@mixin gradient-text-diagonal($from, $to, $via: null, $duration: 4s)
-```
-
-```scss
-.section-heading {
-  @include ease-grad.gradient-text-diagonal(#f97316, #9333ea, $via: #ec4899);
-}
-```
-
----
-
-### `gradient-text-pulse()` — Breathing Pulse
-
-The gradient scale and opacity breathe in and out, creating a glowing live-data feel.
-
-```scss
-@mixin gradient-text-pulse($from, $to, $via: null, $duration: 4s)
-```
-
-```scss
+// Pulsing breathe effect
 .live-badge {
-  @include ease-grad.gradient-text-pulse(#4facfe, #f472b6);
+  @include ease-grad.gradient-text-pulse-um(#6ee7b7, #059669);
 }
-```
 
----
-
-### `gradient-text-hue-spin()` — Hue Wheel
-
-Uses `filter: hue-rotate()` to cycle through all hues over the gradient base. GPU-composited — extremely smooth at 60fps.
-
-```scss
-@mixin gradient-text-hue-spin($from, $to, $duration: 8s)
-```
-
-```scss
-.rainbow-heading {
-  @include ease-grad.gradient-text-hue-spin(#ec4899, #6366f1, $duration: 6s);
+// Full hue-wheel rotation (60fps via filter: hue-rotate)
+.rainbow-tag {
+  @include ease-grad.gradient-text-hue-spin-um(#ec4899, #6366f1, $duration: 6s);
 }
-```
 
----
-
-### `gradient-text-shimmer()` — Light Sweep Shimmer
-
-A bright white highlight sweeps across the gradient text from left to right on a loop.
-
-```scss
-@mixin gradient-text-shimmer($from, $to, $duration: 2.5s)
-```
-
-```scss
+// Shimmer light sweep
 .premium-label {
-  @include ease-grad.gradient-text-shimmer(#fbbf24, #f97316);
+  @include ease-grad.gradient-text-shimmer-um(#fbbf24, #f97316);
 }
 ```
 
----
+### Option B — Utility Classes (HTML)
 
-## Keyframes Reference
-
-| Keyframe | Effect |
-|---|---|
-| `ease-gradient-flow-lr` | Pans background-position left → right → left |
-| `ease-gradient-flow-diagonal` | Pans background-position 0%/0% → 100%/100% |
-| `ease-gradient-pulse` | Scales background-size 200% ↔ 250%, fades opacity |
-| `ease-gradient-spin` | Rotates hue via `filter: hue-rotate(0 → 360deg)` |
-| `ease-gradient-shimmer` | Sweeps background-position from −200% → +200% |
-
----
-
-## Pre-built Utility Classes (HTML Usage)
-
-For zero-SCSS environments, compose classes directly in HTML. Requires `ease-gradient-text` as a base class, then a preset color class, then an animation modifier.
-
-### Syntax
+Compose classes directly in markup without writing any SCSS:
 
 ```html
-<element class="ease-gradient-text [preset] [animation]">...</element>
-```
-
-### Color Preset Classes
-
-| Class | Stops (From → Via → To) |
-|---|---|
-| `.ease-gradient-aurora` | `#4facfe` → `#a78bfa` → `#f472b6` |
-| `.ease-gradient-sunset` | `#f97316` → `#ec4899` → `#9333ea` |
-| `.ease-gradient-ocean` | `#06b6d4` → `#3b82f6` → `#6366f1` |
-| `.ease-gradient-forest` | `#6ee7b7` → `#34d399` → `#059669` |
-| `.ease-gradient-fire` | `#fde68a` → `#f97316` → `#dc2626` |
-| `.ease-gradient-candy` | `#f9a8d4` → `#c084fc` → `#818cf8` |
-| `.ease-gradient-neon` | `#00fff0` → `#a855f7` → `#ec4899` |
-| `.ease-gradient-gold` | `#fbbf24` → `#f59e0b` → `#d97706` |
-| `.ease-gradient-plasma` | `#e879f9` → `#818cf8` → `#22d3ee` |
-| `.ease-gradient-cosmic` | `#1d4ed8` → `#7c3aed` → `#db2777` |
-
-### Animation Modifier Classes
-
-| Class | Effect | Duration |
-|---|---|---|
-| `.ease-gradient-flow-fast` | Left-right pan | 2s |
-| `.ease-gradient-flow-medium` | Left-right pan | 4s |
-| `.ease-gradient-flow-slow` | Left-right pan | 8s |
-| `.ease-gradient-flow-diagonal` | Diagonal pan | 4s |
-| `.ease-gradient-pulse` | Size + opacity breathe | 4s |
-| `.ease-gradient-hue-spin` | Full hue wheel rotation | 8s |
-| `.ease-gradient-shimmer` | White light sweep | 2.5s |
-
-### HTML Examples
-
-```html
-<!-- Aurora gradient flowing left-to-right (medium speed) -->
-<h1 class="ease-gradient-text ease-gradient-aurora ease-gradient-flow-medium">
+<!-- Aurora gradient, medium-speed left-to-right flow -->
+<h1 class="ease-gradient-text-um ease-gradient-aurora-um ease-gradient-flow-medium-um">
   Deep Space Telemetry
 </h1>
 
-<!-- Gold shimmer effect for a premium badge -->
-<span class="ease-gradient-text ease-gradient-gold ease-gradient-shimmer">
+<!-- Gold shimmer effect -->
+<span class="ease-gradient-text-um ease-gradient-gold-um ease-gradient-shimmer-um">
   PRO
 </span>
 
-<!-- Neon hue-spin on a hero heading -->
-<h2 class="ease-gradient-text ease-gradient-neon ease-gradient-hue-spin">
+<!-- Neon hue-spin -->
+<h2 class="ease-gradient-text-um ease-gradient-neon-um ease-gradient-hue-spin-um">
   Quantum Exchange
 </h2>
 
 <!-- Slow pulsing sunset gradient -->
-<p class="ease-gradient-text ease-gradient-sunset ease-gradient-pulse ease-gradient-flow-slow">
+<p class="ease-gradient-text-um ease-gradient-sunset-um ease-gradient-pulse-um">
   Loading mission data...
 </p>
 ```
 
 ---
 
+## Mixin Parameters
+
+### `gradient-text-flow-um()` — Core mixin
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `$from` | Color | `#6366f1` | Gradient start color |
+| `$to` | Color | `#ec4899` | Gradient end color |
+| `$via` | Color \| null | `null` | Optional mid-stop (produces a 3-stop gradient) |
+| `$direction` | String | `to right` | Gradient direction or angle (e.g. `135deg`) |
+| `$duration` | Number | `4s` | Animation duration |
+| `$easing` | String | `linear` | CSS timing function |
+| `$keyframe` | String | `ease-gradient-flow-lr-um` | `@keyframes` name to drive the animation |
+
+### `gradient-text-diagonal-um()` — Diagonal sweep
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `$from` | Color | `#f97316` | Gradient start color |
+| `$to` | Color | `#9333ea` | Gradient end color |
+| `$via` | Color \| null | `null` | Optional mid-stop |
+| `$duration` | Number | `4s` | Animation duration |
+
+### `gradient-text-pulse-um()` — Breathe/pulse
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `$from` | Color | `#4facfe` | Gradient start color |
+| `$to` | Color | `#f472b6` | Gradient end color |
+| `$via` | Color \| null | `null` | Optional mid-stop |
+| `$duration` | Number | `4s` | Animation duration |
+
+### `gradient-text-hue-spin-um()` — Hue-wheel rotation
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `$from` | Color | `#ec4899` | Gradient start color |
+| `$to` | Color | `#6366f1` | Gradient end color |
+| `$duration` | Number | `8s` | Animation duration |
+
+### `gradient-text-shimmer-um()` — Light sweep
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `$from` | Color | `#fbbf24` | Gradient start color |
+| `$to` | Color | `#f97316` | Gradient end color |
+| `$duration` | Number | `2.5s` | Animation duration |
+
+---
+
+## Keyframes Defined
+
+| Keyframe | Effect |
+|---|---|
+| `ease-gradient-flow-lr-um` | Pans `background-position` 0% → 100% → 0% horizontally |
+| `ease-gradient-flow-diagonal-um` | Pans `background-position` diagonally 0%/0% → 100%/100% |
+| `ease-gradient-pulse-um` | Scales `background-size` 200% ↔ 250% and fades `opacity` |
+| `ease-gradient-spin-um` | Rotates hue via `filter: hue-rotate(0 → 360deg)` |
+| `ease-gradient-shimmer-um` | Sweeps `background-position` −200% → +200% |
+
+---
+
+## Preset Color Classes
+
+| Class | From | Via | To |
+|---|---|---|---|
+| `.ease-gradient-aurora-um` | `#4facfe` | `#a78bfa` | `#f472b6` |
+| `.ease-gradient-sunset-um` | `#f97316` | `#ec4899` | `#9333ea` |
+| `.ease-gradient-ocean-um` | `#06b6d4` | `#3b82f6` | `#6366f1` |
+| `.ease-gradient-forest-um` | `#6ee7b7` | `#34d399` | `#059669` |
+| `.ease-gradient-fire-um` | `#fde68a` | `#f97316` | `#dc2626` |
+| `.ease-gradient-candy-um` | `#f9a8d4` | `#c084fc` | `#818cf8` |
+| `.ease-gradient-neon-um` | `#00fff0` | `#a855f7` | `#ec4899` |
+| `.ease-gradient-gold-um` | `#fbbf24` | `#f59e0b` | `#d97706` |
+| `.ease-gradient-plasma-um` | `#e879f9` | `#818cf8` | `#22d3ee` |
+| `.ease-gradient-cosmic-um` | `#1d4ed8` | `#7c3aed` | `#db2777` |
+
+---
+
+## Why is it useful?
+
+Gradient text is one of the most visually impactful typographic effects in modern UI design, but implementing it with animations typically requires repetitive boilerplate (3–4 CSS properties + a keyframe). This partial eliminates that repetition entirely. A single `@include` call generates all necessary cross-browser rules (`background-clip: text`, `-webkit-text-fill-color: transparent`, `animation`) with sensible defaults and full customization via parameters.
+
+It fits EaseMotion's philosophy of **human-readable, animation-first CSS** — developers declare intent (`gradient-text-shimmer-um`) rather than writing low-level animation mechanics. The `prefers-reduced-motion` guard is baked into every mixin so accessibility is automatic.
+
+---
+
 ## Accessibility
 
-All animations in this module automatically disable when the user has enabled **Reduce Motion** in their OS or browser:
+All animations automatically disable when the user has enabled **Reduce Motion** in their OS:
 
-```css
+```scss
 @media (prefers-reduced-motion: reduce) {
-  /* All ease-gradient-* animation classes: animation: none */
-  /* Static gradient is preserved for visual distinction */
+  // animation: none on all animated classes
+  // Static gradient preserved for visual contrast
 }
 ```
